@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Gerador de QR Code</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+  body { margin:0; min-height:100vh; background:#0f172a; color:#f1f5f9; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card { background:#1e293b; border:1px solid #475569; border-radius:16px; padding:32px; max-width:480px; width:100%; text-align:center; }
+  h1 { margin:0 0 8px 0; font-size:22px; }
+  p { color:#94a3b8; margin:0 0 24px 0; font-size:14px; }
+  input { width:100%; background:#334155; border:1px solid #475569; color:#f1f5f9; padding:12px 14px; border-radius:8px; font-size:14px; margin-bottom:16px; }
+  input:focus { outline:none; border-color:#3b82f6; }
+  #qr { display:flex; justify-content:center; background:white; border-radius:12px; padding:16px; min-height:280px; align-items:center; }
+  #qr canvas { display:block; }
+  .empty { color:#94a3b8; font-size:13px; }
+  .url-display { margin-top:12px; font-family:ui-monospace,monospace; font-size:12px; color:#94a3b8; word-break:break-all; }
+  button { margin-top:16px; background:#3b82f6; border:none; color:white; padding:10px 16px; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; }
+  button:hover { background:#2563eb; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>QR Code</h1>
+  <p>Cole uma URL e escaneie com a camera do celular.</p>
+  <input id="urlInput" type="url" placeholder="https://exemplo.com" autofocus />
+  <div id="qr"><div class="empty">O QR Code aparece aqui</div></div>
+  <div class="url-display" id="urlDisplay"></div>
+  <button id="btnDownload" style="display:none;">Baixar PNG</button>
+</div>
+<script>
+const input = document.getElementById('urlInput');
+const qrDiv = document.getElementById('qr');
+const display = document.getElementById('urlDisplay');
+const btnDownload = document.getElementById('btnDownload');
+let lastCanvas = null;
+function render() {
+  const url = input.value.trim();
+  qrDiv.innerHTML = '';
+  display.textContent = '';
+  btnDownload.style.display = 'none';
+  if (!url) { qrDiv.innerHTML = '<div class="empty">O QR Code aparece aqui</div>'; return; }
+  const canvas = document.createElement('canvas');
+  QRCode.toCanvas(canvas, url, { width: 280, margin: 1, errorCorrectionLevel: 'M' }, err => {
+    if (err) { qrDiv.innerHTML = '<div class="empty">URL invalida</div>'; return; }
+    qrDiv.appendChild(canvas);
+    display.textContent = url;
+    lastCanvas = canvas;
+    btnDownload.style.display = '';
+  });
+}
+input.addEventListener('input', render);
+btnDownload.addEventListener('click', () => {
+  if (!lastCanvas) return;
+  const a = document.createElement('a');
+  a.href = lastCanvas.toDataURL('image/png');
+  a.download = 'qr.png';
+  a.click();
+});
+</script>
+</body>
+</html>
